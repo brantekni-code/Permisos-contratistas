@@ -39,7 +39,7 @@
     min-height: 100vh;
   }
 
-  /* ─── SCREENS CORREGIDAS ─── */
+  /* ─── SCREENS ─── */
   .screen { display: none; }
   .screen.active { display: block !important; }
 
@@ -838,7 +838,7 @@
               </div>
               <div class="form-group">
                 <label>Responsable</label>
-                <input type="text" id="responsableTekniplex" required>
+                <input type="text" id="responsableInterno" required>
               </div>
               <div class="form-group">
                 <label>Responsable de la Compañía</label>
@@ -890,7 +890,6 @@
 
 <div id="toast"></div>
 
-<!-- ═══ OVERLAY ÉXITO AUTORIZACIÓN ═══ -->
 <div class="success-overlay" id="success-overlay">
   <div class="success-box" id="success-box">
     <div class="success-circle">
@@ -978,7 +977,6 @@ async function doLogin() {
     displayName = company;
   }
 
-  // Corregido cambio de pantalla ocultando el login por completo
   document.getElementById('screen-login').classList.remove('active');
   document.getElementById('screen-app').classList.add('active');
 
@@ -1062,11 +1060,17 @@ function renderEmployees() {
 
 function toBase64(file) {
   return new Promise((res, rej) => {
-    if (!file) { res({ base64: '', name: '' }); return; }
+    if (!file) { res({ base64: '', name: '', dataUrl: '' }); return; }
     const r = new FileReader();
+    r.onload = () => {
+      res({ 
+        base64: r.result.split(',')[1], 
+        name: file.name, 
+        dataUrl: r.result 
+      });
+    };
+    r.onerror = err => rej(err);
     r.readAsDataURL(file);
-    r.onload = () => res({ base64: r.result.split(',')[1], name: file.name, dataUrl: r.result });
-    r.onerror = rej;
   });
 }
 
@@ -1118,7 +1122,7 @@ document.getElementById('permisoForm').addEventListener('submit', async function
       areaLaborar: document.getElementById('areaLaborar').value.toUpperCase(),
       descripcionActividad: document.getElementById('descripcionActividad').value.toUpperCase(),
       personaAtendio: document.getElementById('personaAtendio').value.toUpperCase(),
-      responsableTekniplex: document.getElementById('responsableTekniplex').value.toUpperCase(),
+      responsableInterno: document.getElementById('responsableInterno').value.toUpperCase(),
       responsableCompania: document.getElementById('responsableCompania').value.toUpperCase(),
       listaEmpleados: [...empleados],
       altoRiesgoActivo,
@@ -1309,7 +1313,6 @@ async function confirmAuthorize() {
       )
     };
 
-    // Enviar a Apps Script (no-cors para evitar bloqueos CORS)
     if (APPS_SCRIPT_URL) {
       await fetch(APPS_SCRIPT_URL, {
         method: 'POST',
@@ -1319,13 +1322,11 @@ async function confirmAuthorize() {
       });
     }
 
-    // Actualizar almacenamiento local
     permit.status = 'authorized';
     permit.authorizedBy = currentUser.email;
     permit.authorizedAt = payload.authorizedAt;
     await storage.set('permit:' + id, JSON.stringify(permit));
 
-    // Mostrar animación de éxito
     showSuccessAnimation(id);
 
   } catch (err) {
@@ -1340,20 +1341,15 @@ function showSuccessAnimation(authorizedId) {
   const overlay = document.getElementById('success-overlay');
   const box = document.getElementById('success-box');
 
-  // Lanzar confeti
   launchConfetti(box);
-
-  // Mostrar overlay
   overlay.classList.add('visible');
 
-  // Pasos con delay escalonado
   ['step1','step2','step3'].forEach((sid, i) => {
     setTimeout(() => {
       document.getElementById(sid).classList.add('appear');
     }, 300 + i * 350);
   });
 
-  // Recargar lista después de cerrar
   overlay._authorizedId = authorizedId;
 }
 
@@ -1361,12 +1357,10 @@ function closeSuccessOverlay() {
   const overlay = document.getElementById('success-overlay');
   overlay.classList.remove('visible');
 
-  // Quitar clases appear para resetear
   ['step1','step2','step3'].forEach(sid => {
     document.getElementById(sid).classList.remove('appear');
   });
 
-  // Resaltar la tarjeta que acaba de autorizarse
   loadPermits().then(() => {
     const card = document.getElementById('card-' + overlay._authorizedId);
     if (card) {
@@ -1378,7 +1372,6 @@ function closeSuccessOverlay() {
 
 function launchConfetti(container) {
   const colors = ['#059669','#2563eb','#d97706','#7c3aed','#dc2626','#0891b2'];
-  // Limpiar confeti anterior
   container.querySelectorAll('.confetti-piece').forEach(el => el.remove());
 
   for (let i = 0; i < 22; i++) {
@@ -1395,7 +1388,6 @@ function launchConfetti(container) {
   }
 }
 
-// CSS para spinner inline
 const styleEl = document.createElement('style');
 styleEl.textContent = '@keyframes spin { to { transform: rotate(360deg); } }';
 document.head.appendChild(styleEl);
