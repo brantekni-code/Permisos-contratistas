@@ -1303,14 +1303,25 @@ async function confirmAuthorize() {
     if (!r || !r.value) throw new Error('Permiso no encontrado');
     const permit = JSON.parse(r.value);
 
+    // SOLUCIÓN: Validamos individualmente cada documento antes de mapearlo al payload para evitar el error 'null'
+    const documentosLimpios = {};
+    if (permit.docs) {
+      for (const key in permit.docs) {
+        const doc = permit.docs[key];
+        if (doc && doc.base64) {
+          documentosLimpios[key] = { name: doc.name, base64: doc.base64 };
+        } else {
+          documentosLimpios[key] = null;
+        }
+      }
+    }
+
     const payload = {
       ...permit,
       status: 'authorized',
       authorizedBy: currentUser.email,
       authorizedAt: new Date().toISOString(),
-      docs: Object.fromEntries(
-        Object.entries(permit.docs || {}).map(([k,v]) => [k, v ? { name: v.name, base64: v.base64 } : null])
-      )
+      docs: documentosLimpios // Usamos el objeto sanitizado
     };
 
     if (APPS_SCRIPT_URL) {
@@ -1331,7 +1342,7 @@ async function confirmAuthorize() {
 
   } catch (err) {
     console.error(err);
-    showToast('Error al autorizar el permiso', 'error');
+    showToast('Error crítico al autorizar: ' + err.message, 'error');
     if (btn) { btn.textContent = 'Autorizar y enviar a Google Sheets'; btn.disabled = false; }
   }
 }
