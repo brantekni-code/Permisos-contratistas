@@ -3,6 +3,1242 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GembaRC Solutions - Permisos de Trabajo</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy: #0f2044;
+    --navy-mid: #1e3a8a;
+    --blue: #2563eb;
+    --blue-light: #eff6ff;
+    --blue-border: #bfdbfe;
+    --amber: #d97706;
+    --amber-light: #fffbeb;
+    --green: #059669;
+    --green-light: #ecfdf5;
+    --red: #dc2626;
+    --red-light: #fef2f2;
+    --gray-50: #f8fafc;
+    --gray-100: #f1f5f9;
+    --gray-200: #e2e8f0;
+    --gray-400: #94a3b8;
+    --gray-600: #475569;
+    --gray-800: #1e293b;
+    --white: #ffffff;
+    --shadow: 0 4px 24px rgba(15,32,68,0.10);
+    --shadow-sm: 0 1px 4px rgba(15,32,68,0.07);
+    --radius: 10px;
+    --radius-sm: 6px;
+  }
+
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--gray-100);
+    color: var(--gray-800);
+    min-height: 100vh;
+  }
+
+  /* ─── SCREENS ─── */
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  /* ─── LOGIN ─── */
+  #screen-login {
+    min-height: 100vh;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 100%);
+    padding: 20px;
+  }
+  #screen-login.active { display: flex; }
+
+  .login-card {
+    background: var(--white);
+    border-radius: 16px;
+    padding: 48px 40px 40px;
+    width: 100%;
+    max-width: 420px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+  }
+  .login-logo {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+  .login-logo .badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px; height: 64px;
+    background: var(--blue-light);
+    border-radius: 16px;
+    margin-bottom: 16px;
+  }
+  .login-logo .badge svg { width: 32px; height: 32px; color: var(--blue); }
+  .login-logo h1 { font-size: 22px; font-weight: 700; color: var(--navy); }
+  .login-logo p { font-size: 13px; color: var(--gray-600); margin-top: 4px; }
+
+  .login-tabs {
+    display: flex;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    margin-bottom: 28px;
+  }
+  .login-tab {
+    flex: 1;
+    padding: 10px;
+    background: var(--gray-50);
+    border: none;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--gray-600);
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .login-tab.active { background: var(--navy); color: var(--white); }
+
+  .login-field { margin-bottom: 18px; }
+  .login-field label { display: block; font-size: 12px; font-weight: 600; color: var(--gray-600); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px; }
+  .login-field input {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1.5px solid var(--gray-200);
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    background: var(--gray-50);
+    transition: all .2s;
+    color: var(--gray-800);
+  }
+  .login-field input:focus { border-color: var(--blue); background: var(--white); outline: none; box-shadow: 0 0 0 3px rgba(37,99,235,.12); }
+
+  .btn-login {
+    width: 100%;
+    padding: 13px;
+    background: var(--navy);
+    color: var(--white);
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background .2s;
+    letter-spacing: .3px;
+  }
+  .btn-login:hover { background: var(--blue); }
+
+  .login-hint { font-size: 12px; color: var(--gray-400); text-align: center; margin-top: 16px; line-height: 1.5; }
+
+  /* ─── APP SHELL ─── */
+  .app-header {
+    background: var(--navy);
+    color: var(--white);
+    padding: 0 24px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  }
+  .header-brand { display: flex; align-items: center; gap: 10px; }
+  .header-brand svg { width: 22px; height: 22px; opacity: .9; }
+  .header-brand span { font-size: 15px; font-weight: 700; letter-spacing: .3px; }
+  .header-user { display: flex; align-items: center; gap: 12px; }
+  .user-chip {
+    display: flex; align-items: center; gap: 8px;
+    background: rgba(255,255,255,0.1);
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+  }
+  .role-badge {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 2px 7px;
+    border-radius: 10px;
+    letter-spacing: .5px;
+  }
+  .role-colaborador { background: rgba(37,99,235,.4); }
+  .role-supervisor { background: rgba(5,150,105,.4); }
+
+  .btn-logout {
+    background: rgba(255,255,255,.12);
+    border: 1px solid rgba(255,255,255,.2);
+    color: var(--white);
+    padding: 6px 14px;
+    border-radius: var(--radius-sm);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .btn-logout:hover { background: rgba(255,255,255,.22); }
+
+  /* ─── MAIN ─── */
+  .app-main { padding: 28px 24px; max-width: 1000px; margin: 0 auto; }
+
+  /* ─── FORM CARD ─── */
+  .card {
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    margin-bottom: 24px;
+  }
+  .card-header {
+    background: var(--navy);
+    padding: 20px 28px;
+    color: var(--white);
+  }
+  .card-header h2 { font-size: 18px; font-weight: 700; }
+  .card-header p { font-size: 13px; opacity: .75; margin-top: 3px; }
+  .card-body { padding: 28px; }
+
+  .section-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .8px;
+    color: var(--blue);
+    background: var(--blue-light);
+    border-left: 3px solid var(--blue);
+    padding: 7px 14px;
+    margin: 24px 0 16px;
+    border-radius: 0 4px 4px 0;
+  }
+
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .col-full { grid-column: 1 / -1; }
+  .form-group { display: flex; flex-direction: column; }
+  .form-group label { font-size: 11px; font-weight: 700; color: var(--gray-600); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px; }
+  .form-group input[type="text"],
+  .form-group input[type="date"],
+  .form-group input[type="email"],
+  .form-group textarea,
+  .form-group select {
+    padding: 10px 12px;
+    border: 1.5px solid var(--gray-200);
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    background: var(--gray-50);
+    color: var(--gray-800);
+    transition: all .2s;
+  }
+  .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+    border-color: var(--blue);
+    background: var(--white);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(37,99,235,.10);
+  }
+  .form-group textarea { resize: vertical; min-height: 90px; }
+
+  .checkbox-group {
+    display: flex; flex-wrap: wrap; gap: 10px;
+    padding: 12px;
+    background: var(--gray-50);
+    border: 1.5px solid var(--gray-200);
+    border-radius: var(--radius-sm);
+  }
+  .check-label {
+    display: flex; align-items: center; gap: 7px;
+    font-size: 13px; font-weight: 500; color: var(--gray-800);
+    cursor: pointer;
+    padding: 4px 10px;
+    border-radius: 4px;
+    transition: background .15s;
+  }
+  .check-label:hover { background: var(--blue-light); }
+  .check-label input { width: 15px; height: 15px; cursor: pointer; accent-color: var(--blue); }
+
+  /* docs panel */
+  .docs-panel {
+    background: var(--gray-50);
+    border: 1.5px dashed var(--gray-200);
+    border-radius: var(--radius-sm);
+    padding: 20px;
+    margin-top: 4px;
+  }
+  .docs-panel.alto-riesgo { border-color: var(--amber); background: var(--amber-light); }
+  .docs-panel.alto-riesgo .docs-panel-title { color: var(--amber); }
+  .docs-panel-title { font-size: 12px; font-weight: 700; color: var(--navy-mid); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 14px; }
+  .docs-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .file-group label { font-size: 11px; font-weight: 600; color: var(--gray-600); display: block; margin-bottom: 5px; }
+  .file-group input[type="file"] {
+    font-size: 12px;
+    color: var(--gray-600);
+    background: var(--white);
+    border: 1.5px solid var(--gray-200);
+    border-radius: 4px;
+    padding: 6px 8px;
+    width: 100%;
+    cursor: pointer;
+  }
+  .file-group input[type="file"]:hover { border-color: var(--blue); }
+
+  /* PDF preview chip modificado para verse como botón */
+  .pdf-chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--blue-light);
+    border: 1px solid var(--blue-border);
+    color: var(--navy-mid);
+    font-size: 11px; font-weight: 600;
+    padding: 5px 12px;
+    border-radius: 20px;
+    cursor: pointer;
+    text-decoration: none;
+    margin-top: 4px;
+    transition: background .15s;
+  }
+  .pdf-chip:hover { background: #dbeafe; }
+
+  /* employees */
+  .emp-add-row { display: flex; gap: 10px; margin-bottom: 10px; }
+  .emp-add-row input { flex: 1; padding: 10px 12px; border: 1.5px solid var(--gray-200); border-radius: var(--radius-sm); font-size: 14px; }
+  .emp-add-row input:focus { border-color: var(--blue); outline: none; }
+  .btn-add {
+    background: var(--green);
+    color: var(--white);
+    border: none;
+    padding: 10px 18px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background .2s;
+  }
+  .btn-add:hover { background: #047857; }
+  .emp-list { border: 1.5px solid var(--gray-200); border-radius: var(--radius-sm); max-height: 180px; overflow-y: auto; background: var(--white); }
+  .emp-item {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 9px 14px;
+    border-bottom: 1px solid var(--gray-100);
+    font-size: 13px;
+  }
+  .emp-item:last-child { border-bottom: none; }
+  .btn-remove { background: var(--red); color: var(--white); border: none; padding: 3px 10px; border-radius: 4px; font-size: 11px; cursor: pointer; font-weight: 600; }
+
+  /* notice */
+  .notice {
+    background: var(--amber-light);
+    border-left: 4px solid var(--amber);
+    color: #92400e;
+    padding: 12px 16px;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: 600;
+    margin-top: 20px;
+    text-align: center;
+  }
+
+  /* submit button */
+  .btn-submit {
+    width: 100%;
+    background: var(--navy);
+    color: var(--white);
+    border: none;
+    padding: 15px;
+    border-radius: var(--radius-sm);
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 16px;
+    letter-spacing: .4px;
+    text-transform: uppercase;
+    transition: background .2s;
+  }
+  .btn-submit:hover { background: var(--blue); }
+  .btn-submit:disabled { background: var(--gray-400); cursor: not-allowed; }
+
+  /* ─── SUPERVISOR PANEL ─── */
+  .panel-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  .panel-header h2 { font-size: 20px; font-weight: 700; color: var(--navy); }
+  .stat-chips { display: flex; gap: 10px; }
+  .stat-chip {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+  }
+  .stat-total { background: var(--blue-light); color: var(--blue); }
+  .stat-pending { background: var(--amber-light); color: var(--amber); }
+  .stat-auth { background: var(--green-light); color: var(--green); }
+
+  .permit-card {
+    background: var(--white);
+    border: 1.5px solid var(--gray-200);
+    border-radius: var(--radius);
+    margin-bottom: 16px;
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow .2s;
+  }
+  .permit-card:hover { box-shadow: var(--shadow); }
+  .permit-card.authorized { border-left: 4px solid var(--green); }
+  .permit-card.pending { border-left: 4px solid var(--amber); }
+
+  .permit-card-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 20px;
+    background: var(--gray-50);
+    border-bottom: 1px solid var(--gray-200);
+    cursor: pointer;
+    user-select: none;
+  }
+  .permit-card-header:hover { background: var(--blue-light); }
+  .permit-meta { display: flex; align-items: center; gap: 14px; }
+  .permit-folio { font-size: 15px; font-weight: 700; color: var(--navy); }
+  .permit-company { font-size: 13px; color: var(--gray-600); }
+  .permit-date { font-size: 12px; color: var(--gray-400); }
+
+  .status-pill {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+  }
+  .status-pending { background: var(--amber-light); color: var(--amber); }
+  .status-authorized { background: var(--green-light); color: var(--green); }
+
+  .permit-card-body {
+    padding: 20px;
+    display: none;
+  }
+  .permit-card-body.open { display: block; }
+
+  .detail-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 16px; }
+  .detail-item label { font-size: 10px; font-weight: 700; color: var(--gray-400); text-transform: uppercase; letter-spacing: .5px; display: block; margin-bottom: 3px; }
+  .detail-item span { font-size: 13px; font-weight: 600; color: var(--gray-800); }
+
+  .docs-review { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+
+  .emp-review-list { background: var(--gray-50); border: 1px solid var(--gray-200); border-radius: 6px; padding: 10px 14px; margin-top: 8px; }
+  .emp-review-item { font-size: 13px; color: var(--gray-800); padding: 3px 0; }
+
+  .btn-authorize {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--green);
+    color: var(--white);
+    border: none;
+    padding: 12px 24px;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 16px;
+    transition: all .2s;
+  }
+  .btn-authorize:hover { background: #047857; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(5,150,105,.3); }
+  .btn-authorize:disabled { background: var(--gray-400); cursor: not-allowed; transform: none; box-shadow: none; }
+
+  .authorized-tag {
+    display: flex; align-items: center; gap: 6px;
+    color: var(--green);
+    font-size: 13px;
+    font-weight: 700;
+    margin-top: 16px;
+  }
+
+  /* empty state */
+  .empty-state {
+    text-align: center; padding: 60px 20px;
+    color: var(--gray-400);
+  }
+  .empty-state svg { width: 48px; height: 48px; margin-bottom: 12px; opacity: .4; }
+  .empty-state p { font-size: 15px; font-weight: 600; }
+  .empty-state span { font-size: 13px; }
+
+  /* toast */
+  #toast {
+    position: fixed; bottom: 24px; right: 24px;
+    background: var(--navy);
+    color: var(--white);
+    padding: 14px 20px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    box-shadow: 0 8px 24px rgba(0,0,0,.2);
+    transform: translateY(80px);
+    opacity: 0;
+    transition: all .35s cubic-bezier(.34,1.56,.64,1);
+    z-index: 999;
+    max-width: 320px;
+  }
+  #toast.show { transform: translateY(0); opacity: 1; }
+  #toast.success { background: var(--green); }
+  #toast.error { background: var(--red); }
+
+  /* hidden util */
+  .hidden { display: none !important; }
+
+  /* modal */
+  .modal-backdrop {
+    position: fixed; inset: 0;
+    background: rgba(15,32,68,.5);
+    backdrop-filter: blur(4px);
+    z-index: 200;
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px;
+  }
+  .modal-backdrop.hidden { display: none; }
+  .modal {
+    background: var(--white);
+    border-radius: 14px;
+    padding: 32px;
+    max-width: 420px;
+    width: 100%;
+    box-shadow: 0 24px 64px rgba(0,0,0,.2);
+  }
+  .modal h3 { font-size: 18px; font-weight: 700; color: var(--navy); margin-bottom: 10px; }
+  .modal p { font-size: 14px; color: var(--gray-600); margin-bottom: 24px; line-height: 1.6; }
+  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+  .btn-cancel { background: var(--gray-100); border: none; padding: 10px 18px; border-radius: var(--radius-sm); font-size: 14px; font-weight: 600; cursor: pointer; }
+  .btn-confirm { background: var(--green); color: var(--white); border: none; padding: 10px 20px; border-radius: var(--radius-sm); font-size: 14px; font-weight: 700; cursor: pointer; }
+
+  @media (max-width: 640px) {
+    .form-grid { grid-template-columns: 1fr; }
+    .col-full { grid-column: 1; }
+    .docs-grid { grid-template-columns: 1fr; }
+    .detail-grid { grid-template-columns: 1fr 1fr; }
+    .app-main { padding: 16px; }
+    .card-body { padding: 18px; }
+    .login-card { padding: 32px 24px; }
+    .stat-chips { flex-wrap: wrap; }
+  }
+</style>
+</head>
+<body>
+
+<div id="screen-login" class="screen active">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+      </div>
+      <h1>Permisos de Trabajo</h1>
+      <p>Sistema de gestión de contratistas externos</p>
+    </div>
+
+    <div class="login-tabs">
+      <button class="login-tab active" onclick="setLoginRole('colaborador')">👷 Colaborador</button>
+      <button class="login-tab" onclick="setLoginRole('supervisor')">🔒 Supervisor</button>
+    </div>
+
+    <div id="login-form">
+      <div class="login-field" id="colaborador-company-field">
+        <label>Nombre de la Empresa</label>
+        <input type="text" id="loginCompany" placeholder="Ej: Constructora ABC" autocomplete="organization">
+      </div>
+      <div class="login-field" id="supervisor-email-field" style="display:none;">
+        <label>Correo electrónico</label>
+        <input type="email" id="loginEmail" placeholder="tucorreo@empresa.com" autocomplete="email">
+      </div>
+      <div class="login-field" id="supervisor-password-field" style="display:none;">
+        <label>Contraseña de supervisor</label>
+        <input type="password" id="loginPassword" placeholder="••••••••">
+      </div>
+    </div>
+
+    <button class="btn-login" onclick="doLogin()">Entrar</button>
+    <p class="login-hint" id="login-hint">Ingresa el nombre de tu empresa para registrar tu solicitud de permiso.</p>
+  </div>
+</div>
+
+<div id="screen-app" class="screen">
+  <header class="app-header">
+    <div class="header-brand">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+      <span>Permisos de Trabajo</span>
+    </div>
+    <div class="header-user">
+      <div class="user-chip">
+        <span id="header-email"></span>
+        <span class="role-badge" id="header-role-badge"></span>
+      </div>
+      <button class="btn-logout" onclick="doLogout()">Salir</button>
+    </div>
+  </header>
+
+  <main class="app-main">
+    <div id="view-colaborador" class="hidden">
+      <div class="card">
+        <div class="card-header">
+          <h2>Nueva Solicitud de Permiso para Trabajos Externos</h2>
+          <p>Completa todos los campos y adjunta los documentos requeridos</p>
+        </div>
+        <div class="card-body">
+          <form id="permisoForm" autocomplete="off">
+
+            <div class="section-label">1. Información General del Permiso</div>
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Año</label>
+                <input type="text" id="anio" name="anio" readonly>
+              </div>
+              <div class="form-group">
+                <label>Folio</label>
+                <input type="text" id="folio" name="folio" placeholder="Ej: PT-2026-001" required>
+              </div>
+              <div class="form-group">
+                <label>Fecha de Elaboración</label>
+                <input type="date" id="fechaElaboracion" name="fechaElaboracion" required>
+              </div>
+              <div class="form-group">
+                <label>Teléfono de Emergencia</label>
+                <input type="text" id="telefonoEmergencia" name="telefonoEmergencia" required>
+              </div>
+              <div class="form-group">
+                <label>Vigencia Inicio</label>
+                <input type="date" id="vigenciaInicio" name="vigenciaInicio" required>
+              </div>
+              <div class="form-group">
+                <label>Vigencia Término</label>
+                <input type="date" id="vigenciaTermino" name="vigenciaTermino" required>
+              </div>
+              <div class="form-group">
+                <label>Nombre del Responsable</label>
+                <input type="text" id="nombreResponsable" name="nombreResponsable" required>
+              </div>
+              <div class="form-group">
+                <label>Horario de Trabajo</label>
+                <input type="text" id="horarioLaborar" name="horarioLaborar" placeholder="Ej: 08:00 - 17:00" required>
+              </div>
+            </div>
+
+            <div class="section-label">2. Clasificación del Trabajo</div>
+            <div class="form-grid">
+              <div class="form-group col-full">
+                <label>Tipo de Contrato</label>
+                <div class="checkbox-group">
+                  <label class="check-label"><input type="radio" name="tipoContrato" value="OBRA" required> OBRA</label>
+                  <label class="check-label"><input type="radio" name="tipoContrato" value="SERVICIO"> SERVICIO</label>
+                  <label class="check-label"><input type="radio" name="tipoContrato" value="ADMINISTRACIÓN"> ADMINISTRACIÓN</label>
+                </div>
+              </div>
+            </div>
+
+            <div class="section-label">3. Análisis de Riesgo</div>
+            <div class="form-grid">
+              <div class="form-group col-full">
+                <label>Trabajos de Alto Riesgo</label>
+                <div class="checkbox-group" id="altoRiesgoGroup">
+                  <label class="check-label"><input type="checkbox" value="ALTURA" class="alto-riesgo-check"> ALTURA</label>
+                  <label class="check-label"><input type="checkbox" value="CORTE Y SOLDADURA" class="alto-riesgo-check"> CORTE Y SOLDADURA</label>
+                  <label class="check-label"><input type="checkbox" value="ESPACIO CONFINADO" class="alto-riesgo-check"> ESPACIO CONFINADO</label>
+                  <label class="check-label"><input type="checkbox" value="ELÉCTRICO" class="alto-riesgo-check"> ELÉCTRICO</label>
+                  <label class="check-label"><input type="checkbox" value="MANIOBRA DE CARGA" class="alto-riesgo-check"> MANIOBRA DE CARGA</label>
+                  <label class="check-label"><input type="checkbox" id="arNoAplica" value="NO APLICA" checked> NO APLICA</label>
+                </div>
+              </div>
+
+              <div class="form-group col-full">
+                <div class="docs-panel" id="panelDocGenerales">
+                  <div class="docs-panel-title">📎 Documentación Obligatoria General (PDF)</div>
+                  <div class="docs-grid">
+                    <div class="file-group">
+                      <label>Resumen de Liquidación *</label>
+                      <input type="file" id="pdfLiquidacion" accept=".pdf" required>
+                    </div>
+                    <div class="file-group">
+                      <label>SUA o Alta de Nuevo Ingreso *</label>
+                      <input type="file" id="pdfSua" accept=".pdf" required>
+                    </div>
+                    <div class="file-group">
+                      <label>Comprobante de Pago *</label>
+                      <input type="file" id="pdfPago" accept=".pdf" required>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-group col-full hidden" id="panelDocAltoRiesgo">
+                <div class="docs-panel alto-riesgo">
+                  <div class="docs-panel-title">⚠️ Documentación Adicional – Alto Riesgo (PDF)</div>
+                  <div class="docs-grid">
+                    <div class="file-group">
+                      <label>DC3 *</label>
+                      <input type="file" id="pdfDc3" accept=".pdf">
+                    </div>
+                    <div class="file-group">
+                      <label>Fichas Técnicas *</label>
+                      <input type="file" id="pdfFichas" accept=".pdf">
+                    </div>
+                    <div class="file-group">
+                      <label>HDS *</label>
+                      <input type="file" id="pdfHds" accept=".pdf">
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-group col-full">
+                <label>¿Cuenta con DC-3 Aplicable?</label>
+                <div class="checkbox-group" id="dc3Group">
+                  <label class="check-label"><input type="checkbox" value="ALTURA"> ALTURA</label>
+                  <label class="check-label"><input type="checkbox" value="CORTE Y SOLDADURA"> CORTE Y SOLDADURA</label>
+                  <label class="check-label"><input type="checkbox" value="ESPACIO CONFINADO"> ESPACIO CONFINADO</label>
+                  <label class="check-label"><input type="checkbox" value="ELÉCTRICO"> ELÉCTRICO</label>
+                  <label class="check-label"><input type="checkbox" value="MANIOBRA DE CARGA"> MANIOBRA DE CARGA</label>
+                  <label class="check-label"><input type="checkbox" id="dc3NoAplica" checked> NO APLICA</label>
+                </div>
+              </div>
+
+              <div class="form-group col-full">
+                <label>Procedimiento de Alto Riesgo Adjunto</label>
+                <div class="checkbox-group">
+                  <label class="check-label"><input type="radio" name="procedimientoAltoRiesgo" value="SI"> SÍ</label>
+                  <label class="check-label"><input type="radio" name="procedimientoAltoRiesgo" value="N/A" checked> N/A</label>
+                </div>
+              </div>
+            </div>
+
+            <div class="section-label">4. Ubicación y Actividades</div>
+            <div class="form-grid">
+              <div class="form-group col-full">
+                <label>Área en donde va a Laborar</label>
+                <input type="text" id="areaLaborar" required>
+              </div>
+              <div class="form-group col-full">
+                <label>Descripción Detallada del Trabajo</label>
+                <textarea id="descripcionActividad" required></textarea>
+              </div>
+              <div class="form-group col-full">
+                <label>Persona que Atendió / Validó</label>
+                <input type="text" id="personaAtendio" required>
+              </div>
+              <div class="form-group">
+                <label>Responsable de Validación Interna</label>
+                <input type="text" id="responsableInterno" required>
+              </div>
+              <div class="form-group">
+                <label>Responsable de la Compañía Contratista</label>
+                <input type="text" id="responsableCompania" required>
+              </div>
+            </div>
+
+            <div class="section-label">5. Personal Contratista</div>
+            <div class="emp-add-row">
+              <input type="text" id="employeeName" placeholder="Nombre completo del trabajador">
+              <button type="button" class="btn-add" onclick="addEmployee()">+ Agregar</button>
+            </div>
+            <div class="emp-list" id="employeeList"></div>
+
+            <div class="notice">
+              ⚠️ El permiso solo es válido por actividad. Se deberá renovar por cada trabajo a realizar.
+            </div>
+
+            <button type="submit" class="btn-submit" id="btnEnviar">Enviar Solicitud</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div id="view-supervisor" class="hidden">
+      <div class="panel-header">
+        <h2>Solicitudes de Permiso</h2>
+        <div class="stat-chips">
+          <span class="stat-chip stat-total" id="stat-total">Total: 0</span>
+          <span class="stat-chip stat-pending" id="stat-pending">Pendientes: 0</span>
+          <span class="stat-chip stat-auth" id="stat-auth">Autorizados: 0</span>
+        </div>
+      </div>
+      <div id="supervisor-config-notice" class="notice hidden" style="margin-bottom:16px;">
+        ⚙️ Para enviar autorizaciones a Google Sheets, configura la URL del Apps Script en el código (variable <code>APPS_SCRIPT_URL</code>).
+      </div>
+      <div id="permits-list"></div>
+    </div>
+  </main>
+</div>
+
+<div class="modal-backdrop hidden" id="modal-authorize">
+  <div class="modal">
+    <h3>✅ Autorizar Permiso</h3>
+    <p>¿Confirmas la autorización de este permiso?<br>Los datos se registrarán en Google Sheets, los PDFs se guardarán en Drive y se generará un PDF con la lista de personal, todo dentro de una carpeta con el número de folio.</p>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
+      <button class="btn-confirm" onclick="confirmAuthorize()">Sí, Autorizar</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════
+//  CONFIGURACIÓN — URL de Google Apps Script
+// ══════════════════════════════════════════
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzSsUcoPfFH1zx8MkbI_eQy3tQmP-B2Lqwwgxtgdbuw6fogZWVcjHc6ofFeonzjWhUz4Q/exec";
+
+// Supervisores autorizados (Estándar de Seguridad EHS)
+const SUPERVISORS = {
+  "seguridad.ehs@empresa.com": "Gemba2026$",
+  "jefe.seguridad@empresa.com": "seguridad456"
+};
+
+// ══════════════════════════════════════════
+//  ESTADO
+// ══════════════════════════════════════════
+let currentUser = null;   
+let empleados = [];
+let pendingAuthorizeId = null;
+
+const storage = window.storage || {
+  async get(k) { const v = localStorage.getItem(k); return v ? { value: v } : null; },
+  async set(k, v) { localStorage.setItem(k, v); return true; },
+  async list(prefix) { const keys = Object.keys(localStorage).filter(k=>k.startsWith(prefix||'')); return { keys }; }
+};
+
+// ══════════════════════════════════════════
+//  LOGIN
+// ══════════════════════════════════════════
+let loginRole = 'colaborador';
+
+function setLoginRole(role) {
+  loginRole = role;
+  document.querySelectorAll('.login-tab').forEach((t,i)=>t.classList.toggle('active', (i===0&&role==='colaborador')||(i===1&&role==='supervisor')));
+  const companyField = document.getElementById('colaborador-company-field');
+  const emailField = document.getElementById('supervisor-email-field');
+  const pwField = document.getElementById('supervisor-password-field');
+  const hint = document.getElementById('login-hint');
+  if (role === 'supervisor') {
+    companyField.style.display = 'none';
+    emailField.style.display = 'block';
+    pwField.style.display = 'block';
+    hint.textContent = 'Ingresa como supervisor para revisar y autorizar permisos.';
+  } else {
+    companyField.style.display = 'block';
+    emailField.style.display = 'none';
+    pwField.style.display = 'none';
+    hint.textContent = 'Ingresa el nombre de tu empresa para registrar tu solicitud de permiso.';
+  }
+}
+
+async function doLogin() {
+  let displayName;
+
+  if (loginRole === 'supervisor') {
+    const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+    if (!email || !email.includes('@')) { showToast('Ingresa un correo válido', 'error'); return; }
+    const pw = document.getElementById('loginPassword').value;
+    if (!SUPERVISORS[email] || SUPERVISORS[email] !== pw) {
+      showToast('Credenciales de supervisor incorrectas', 'error'); return;
+    }
+    currentUser = { email, role: loginRole };
+    displayName = email;
+  } else {
+    const company = document.getElementById('loginCompany').value.trim();
+    if (!company) { showToast('Ingresa el nombre de tu empresa', 'error'); return; }
+    currentUser = { company, role: loginRole };
+    displayName = company;
+  }
+
+  document.getElementById('screen-login').classList.remove('active');
+  document.getElementById('screen-app').classList.add('active');
+
+  document.getElementById('header-email').textContent = displayName;
+  const badge = document.getElementById('header-role-badge');
+  badge.textContent = loginRole === 'supervisor' ? 'Supervisor' : 'Colaborador';
+  badge.className = 'role-badge ' + (loginRole === 'supervisor' ? 'role-supervisor' : 'role-colaborador');
+
+  if (loginRole === 'supervisor') {
+    document.getElementById('view-supervisor').classList.remove('hidden');
+    if (APPS_SCRIPT_URL === "TU_URL_AQUI") document.getElementById('supervisor-config-notice').classList.remove('hidden');
+    await loadPermits();
+  } else {
+    document.getElementById('view-colaborador').classList.remove('hidden');
+    initForm();
+  }
+}
+
+document.getElementById('loginCompany').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
+document.getElementById('loginEmail').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
+document.getElementById('loginPassword').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
+
+function doLogout() {
+  currentUser = null;
+  document.getElementById('screen-app').classList.remove('active');
+  document.getElementById('screen-login').classList.add('active');
+  document.getElementById('view-colaborador').classList.add('hidden');
+  document.getElementById('view-supervisor').classList.add('hidden');
+  document.getElementById('loginCompany').value = '';
+  document.getElementById('loginEmail').value = '';
+  document.getElementById('loginPassword').value = '';
+  empleados = [];
+}
+
+// ══════════════════════════════════════════
+//  COLABORADOR – FORM LÓGICA
+// ══════════════════════════════════════════
+function initForm() {
+  document.getElementById('anio').value = new Date().getFullYear();
+  setupCheckboxLogic('altoRiesgoGroup', 'arNoAplica', true);
+  setupCheckboxLogic('dc3Group', 'dc3NoAplica', false);
+}
+
+function setupCheckboxLogic(groupId, noAplicaId, controlPanel) {
+  const container = document.getElementById(groupId);
+  const checkboxes = container.querySelectorAll('input[type="checkbox"]');
+  const noAplica = document.getElementById(noAplicaId);
+  checkboxes.forEach(cb => {
+    cb.addEventListener('change', () => {
+      if (cb === noAplica && noAplica.checked) {
+        checkboxes.forEach(o => { if (o !== noAplica) o.checked = false; });
+      } else if (cb.checked && cb !== noAplica) {
+        noAplica.checked = false;
+      }
+      if (controlPanel) updateAltoRiesgoPanel();
+    });
+  });
+}
+
+function updateAltoRiesgoPanel() {
+  const active = Array.from(document.querySelectorAll('.alto-riesgo-check')).some(c => c.checked);
+  const panel = document.getElementById('panelDocAltoRiesgo');
+  panel.classList.toggle('hidden', !active);
+  ['pdfDc3','pdfFichas','pdfHds'].forEach(id => document.getElementById(id).required = active);
+}
+
+function addEmployee() {
+  const inp = document.getElementById('employeeName');
+  const name = inp.value.trim().toUpperCase();
+  if (!name) return;
+  empleados.push(name);
+  inp.value = '';
+  renderEmployees();
+}
+function removeEmployee(i) { empleados.splice(i,1); renderEmployees(); }
+function renderEmployees() {
+  const list = document.getElementById('employeeList');
+  list.innerHTML = empleados.length
+    ? empleados.map((e,i) => `<div class="emp-item"><span>${i+1}. ${e}</span><button type="button" class="btn-remove" onclick="removeEmployee(${i})">Eliminar</button></div>`).join('')
+    : '<div style="padding:12px 14px;font-size:13px;color:var(--gray-400)">No se han agregado trabajadores.</div>';
+}
+
+function toBase64(file) {
+  return new Promise((res, rej) => {
+    if (!file) { res({ base64: '', name: '' }); return; }
+    const r = new FileReader();
+    r.readAsDataURL(file);
+    r.onload = () => res({ base64: r.result.split(',')[1], name: file.name, dataUrl: r.result });
+    r.onerror = rej;
+  });
+}
+
+document.getElementById('permisoForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  if (empleados.length === 0) { showToast('Agrega al menos un trabajador contratista', 'error'); return; }
+
+  const btn = document.getElementById('btnEnviar');
+  btn.textContent = 'Guardando solicitud...';
+  btn.disabled = true;
+
+  try {
+    const altoRiesgoActivo = Array.from(document.querySelectorAll('.alto-riesgo-check')).some(c => c.checked);
+    const getChecked = (groupId) => Array.from(document.getElementById(groupId).querySelectorAll('input:checked')).map(c=>c.value).join(', ');
+
+    const fileLiq = await toBase64(document.getElementById('pdfLiquidacion').files[0]);
+    const fileSua = await toBase64(document.getElementById('pdfSua').files[0]);
+    const filePag = await toBase64(document.getElementById('pdfPago').files[0]);
+    let fileDc3={base64:'',name:'',dataUrl:''}, fileFichas={base64:'',name:'',dataUrl:''}, fileHds={base64:'',name:'',dataUrl:''};
+
+    if (altoRiesgoActivo) {
+      const d3 = document.getElementById('pdfDc3').files[0];
+      const fi = document.getElementById('pdfFichas').files[0];
+      const hd = document.getElementById('pdfHds').files[0];
+      if (!d3||!fi||!hd) { showToast('Adjunta todos los documentos de alto riesgo', 'error'); btn.textContent='Enviar Solicitud'; btn.disabled=false; return; }
+      fileDc3 = await toBase64(d3);
+      fileFichas = await toBase64(fi);
+      fileHds = await toBase64(hd);
+    }
+
+    const permit = {
+      id: 'PT-' + Date.now(),
+      email: currentUser.company,
+      timestamp: new Date().toISOString(),
+      status: 'pending',
+      anio: document.getElementById('anio').value,
+      folio: document.getElementById('folio').value,
+      fechaElaboracion: document.getElementById('fechaElaboracion').value,
+      telefonoEmergencia: document.getElementById('telefonoEmergencia').value,
+      vigenciaInicio: document.getElementById('vigenciaInicio').value,
+      vigenciaTermino: document.getElementById('vigenciaTermino').value,
+      nombreResponsable: document.getElementById('nombreResponsable').value.toUpperCase(),
+      horarioLaborar: document.getElementById('horarioLaborar').value.toUpperCase(),
+      nombreCompania: currentUser.company.toUpperCase(),
+      tipoContrato: (document.querySelector('input[name="tipoContrato"]:checked')||{}).value||'',
+      altoRiesgo: getChecked('altoRiesgoGroup'),
+      dc3: getChecked('dc3Group'),
+      procedimientoAltoRiesgo: (document.querySelector('input[name="procedimientoAltoRiesgo"]:checked')||{}).value||'N/A',
+      areaLaborar: document.getElementById('areaLaborar').value.toUpperCase(),
+      descripcionActividad: document.getElementById('descripcionActividad').value.toUpperCase(),
+      personaAtendio: document.getElementById('personaAtendio').value.toUpperCase(),
+      responsableInterno: document.getElementById('responsableInterno').value.toUpperCase(),
+      responsableCompania: document.getElementById('responsableCompania').value.toUpperCase(),
+      listaEmpleados: [...empleados],
+      altoRiesgoActivo,
+      docs: {
+        liquidacion: { name: fileLiq.name, dataUrl: fileLiq.dataUrl, base64: fileLiq.base64 },
+        sua: { name: fileSua.name, dataUrl: fileSua.dataUrl, base64: fileSua.base64 },
+        pago: { name: filePag.name, dataUrl: filePag.dataUrl, base64: filePag.base64 },
+        dc3: altoRiesgoActivo ? { name: fileDc3.name, dataUrl: fileDc3.dataUrl, base64: fileDc3.base64 } : null,
+        fichas: altoRiesgoActivo ? { name: fileFichas.name, dataUrl: fileFichas.dataUrl, base64: fileFichas.base64 } : null,
+        hds: altoRiesgoActivo ? { name: fileHds.name, dataUrl: fileHds.dataUrl, base64: fileHds.base64 } : null,
+      }
+    };
+
+    await storage.set('permit:' + permit.id, JSON.stringify(permit));
+
+    showToast('✅ Solicitud enviada correctamente', 'success');
+    document.getElementById('permisoForm').reset();
+    document.getElementById('anio').value = new Date().getFullYear();
+    empleados = [];
+    renderEmployees();
+    document.getElementById('panelDocAltoRiesgo').classList.add('hidden');
+    btn.textContent = 'Enviar Solicitud';
+    btn.disabled = false;
+
+  } catch (err) {
+    console.error(err);
+    showToast('Error al guardar la solicitud', 'error');
+    btn.textContent = 'Enviar Solicitud';
+    btn.disabled = false;
+  }
+});
+
+// ══════════════════════════════════════════
+//  SUPERVISOR – LISTA RENDERING
+// ══════════════════════════════════════════
+async function loadPermits() {
+  const list = document.getElementById('permits-list');
+  list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--gray-400);font-size:14px;">Cargando solicitudes...</div>';
+
+  try {
+    const result = await storage.list('permit:');
+    const keys = result ? result.keys : [];
+
+    const permits = [];
+    for (const key of keys) {
+      try {
+        const r = await storage.get(key);
+        if (r && r.value) permits.push(JSON.parse(r.value));
+      } catch {}
+    }
+
+    permits.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
+    renderPermitsList(permits);
+
+  } catch (err) {
+    list.innerHTML = '<div class="empty-state"><p>Error al cargar solicitudes</p></div>';
+    console.error(err);
+  }
+}
+
+function renderPermitsList(permits) {
+  const list = document.getElementById('permits-list');
+  const total = permits.length;
+  const pend = permits.filter(p=>p.status==='pending').length;
+  const auth = permits.filter(p=>p.status==='authorized').length;
+
+  document.getElementById('stat-total').textContent = `Total: ${total}`;
+  document.getElementById('stat-pending').textContent = `Pendientes: ${pend}`;
+  document.getElementById('stat-auth').textContent = `Autorizados: ${auth}`;
+
+  if (!permits.length) {
+    list.innerHTML = `<div class="empty-state">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+      <p>Sin solicitudes aún</p><span>Los colaboradores aún no han enviado permisos.</span>
+    </div>`;
+    return;
+  }
+
+  list.innerHTML = permits.map(p => buildPermitCard(p)).join('');
+}
+
+function buildPermitCard(p) {
+  const date = new Date(p.timestamp).toLocaleDateString('es-MX', { day:'2-digit', month:'short', year:'numeric' });
+  const isAuth = p.status === 'authorized';
+
+  const docChips = buildDocChips(p.docs);
+  const empList = p.listaEmpleados.map((e,i)=>`<div class="emp-review-item">${i+1}. ${e}</div>`).join('');
+  const authInfo = isAuth
+    ? `<div class="authorized-tag">✅ Autorizado por ${p.authorizedBy||'supervisor'} el ${new Date(p.authorizedAt||p.timestamp).toLocaleDateString('es-MX')}</div>`
+    : `<button class="btn-authorize" onclick="openAuthorizeModal('${p.id}')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>
+        Autorizar y enviar a Google Sheets
+      </button>`;
+
+  return `<div class="permit-card ${isAuth?'authorized':'pending'}" id="card-${p.id}">
+    <div class="permit-card-header" onclick="toggleCard('${p.id}')">
+      <div class="permit-meta">
+        <span class="permit-folio">${p.folio || p.id}</span>
+        <span class="permit-company">${p.nombreCompania}</span>
+        <span class="permit-date">${date} · ${p.nombreResponsable}</span>
+      </div>
+      <span class="status-pill ${isAuth?'status-authorized':'status-pending'}">${isAuth?'✅ Autorizado':'⏳ Pendiente'}</span>
+    </div>
+    <div class="permit-card-body" id="body-${p.id}">
+      <div class="detail-grid">
+        <div class="detail-item"><label>Responsable</label><span>${p.nombreResponsable}</span></div>
+        <div class="detail-item"><label>Tipo de Contrato</label><span>${p.tipoContrato}</span></div>
+        <div class="detail-item"><label>Horario</label><span>${p.horarioLaborar}</span></div>
+        <div class="detail-item"><label>Vigencia Inicio</label><span>${p.vigenciaInicio}</span></div>
+        <div class="detail-item"><label>Vigencia Término</label><span>${p.vigenciaTermino}</span></div>
+        <div class="detail-item"><label>Tel. Emergencia</label><span>${p.telefonoEmergencia}</span></div>
+        <div class="detail-item" style="grid-column:1/-1"><label>Área</label><span>${p.areaLaborar}</span></div>
+        <div class="detail-item" style="grid-column:1/-1"><label>Descripción</label><span>${p.descripcionActividad}</span></div>
+        <div class="detail-item"><label>Alto Riesgo</label><span>${p.altoRiesgo}</span></div>
+        <div class="detail-item"><label>DC-3</label><span>${p.dc3}</span></div>
+        <div class="detail-item"><label>Procedimiento AR</label><span>${p.procedimientoAltoRiesgo}</span></div>
+      </div>
+      <div style="margin-top:14px"><div style="font-size:11px;font-weight:700;color:var(--gray-400);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">Personal Contratista</div>
+        <div class="emp-review-list">${empList || '<div class="emp-review-item" style="color:var(--gray-400)">Sin personal registrado</div>'}</div>
+      </div>
+      <div style="margin-top:14px"><div style="font-size:11px;font-weight:700;color:var(--gray-400);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">Documentos Adjuntos (Verificar antes de autorizar)</div>
+        <div class="docs-review">${docChips}</div>
+      </div>
+      ${authInfo}
+    </div>
+  </div>`;
+}
+
+// NUEVA FUNCIÓN: Renderiza los botones para previsualizar los PDFs en el local del Supervisor
+function buildDocChips(docs) {
+  if (!docs) return '<span style="font-size:13px;color:var(--gray-400)">Sin documentos</span>';
+  const items = [
+    { key: 'liquidacion', label: '📄 Liquidación' },
+    { key: 'sua', label: '📄 SUA' },
+    { key: 'pago', label: '📄 Pago' },
+    { key: 'dc3', label: '⚠️ DC3' },
+    { key: 'fichas', label: '⚠️ Fichas' },
+    { key: 'hds', label: '⚠️ HDS' },
+  ];
+  return items
+    .filter(i => docs[i.key] && (docs[i.key].base64 || docs[i.key].dataUrl))
+    .map(i => {
+      const base64Data = docs[i.key].base64 || docs[i.key].dataUrl;
+      return `<button type="button" class="pdf-chip" onclick="viewPdfInNewTab('${base64Data}')" title="${docs[i.key].name}">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        ${i.label}
+      </button>`;
+    })
+    .join('');
+}
+
+function toggleCard(id) {
+  const body = document.getElementById('body-' + id);
+  body.classList.toggle('open');
+}
+
+// ══════════════════════════════════════════
+//  AUTORIZACIÓN & INTEGRACIÓN
+// ══════════════════════════════════════════
+function openAuthorizeModal(id) {
+  pendingAuthorizeId = id;
+  document.getElementById('modal-authorize').classList.remove('hidden');
+}
+function closeModal() {
+  pendingAuthorizeId = null;
+  document.getElementById('modal-authorize').classList.add('hidden');
+}
+
+async function confirmAuthorize() {
+  closeModal();
+  if (!pendingAuthorizeId) return;
+  const id = pendingAuthorizeId;
+
+  const btn = document.querySelector(`#card-${id} .btn-authorize`);
+  if (btn) { btn.textContent = 'Enviando...'; btn.disabled = true; }
+
+  try {
+    const r = await storage.get('permit:' + id);
+    if (!r || !r.value) throw new Error('Permiso no encontrado');
+    const permit = JSON.parse(r.value);
+
+    const payload = {
+      ...permit,
+      status: 'authorized',
+      authorizedBy: currentUser.email,
+      authorizedAt: new Date().toISOString(),
+      docs: Object.fromEntries(
+        Object.entries(permit.docs || {}).map(([k,v]) => [k, v ? { name: v.name, base64: v.base64 } : null])
+      )
+    };
+
+    if (APPS_SCRIPT_URL && APPS_SCRIPT_URL !== "TU_URL_AQUI") {
+      const resp = await fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      let result;
+      try { result = await resp.json(); } catch { result = null; }
+      if (!result || result.ok !== true) {
+        throw new Error((result && result.error) || 'El servidor de Google no confirmó el guardado.');
+      }
+    }
+
+    permit.status = 'authorized';
+    permit.authorizedBy = currentUser.email;
+    permit.authorizedAt = payload.authorizedAt;
+    await storage.set('permit:' + id, JSON.stringify(permit));
+
+    showToast('✅ Permiso autorizado y enviado a Google Sheets', 'success');
+    await loadPermits();
+
+  } catch (err) {
+    console.error(err);
+    showToast('Error al autorizar el permiso', 'error');
+    if (btn) { btn.textContent = 'Autorizar y enviar a Google Sheets'; btn.disabled = false; }
+  }
+}
+
+// NUEVA FUNCIÓN: Abre de forma limpia y binaria el PDF local en el visor nativo antes de enviarse al Excel
+function viewPdfInNewTab(base64String) {
+  try {
+    const pureBase64 = base64String.includes(',') ? base64String.split(',')[1] : base64String;
+    const byteCharacters = atob(pureBase64);
+    const byteNumbers = new Array(byteCharacters.length);
+    for (let i = 0; i < byteCharacters.length; i++) {
+      byteNumbers[i] = byteCharacters.charCodeAt(i);
+    }
+    const byteArray = new Uint8Array(byteNumbers);
+    const blob = new Blob([byteArray], { type: 'application/pdf' });
+    const fileURL = URL.createObjectURL(blob);
+    window.open(fileURL, '_blank');
+  } catch (error) {
+    console.error("Error al abrir el PDF:", error);
+    showToast("No se pudo abrir el PDF. Compara el formato del archivo original.", "error");
+  }
+}
+
+// ══════════════════════════════════════════
+//  TOAST UTILS
+// ══════════════════════════════════════════
+function showToast(msg, type='') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = type ? `show ${type}` : 'show';
+  setTimeout(() => { t.classList.remove('show'); }, 3500);
+}
+</script>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Permisos de Trabajo</title>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
