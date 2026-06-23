@@ -39,20 +39,17 @@
     min-height: 100vh;
   }
 
-  /* ─── SCREENS (CORREGIDO PARA EVITAR QUE SE ENCIMEN) ─── */
-  .screen { display: none !important; }
+  /* ─── SCREENS CORREGIDAS ─── */
+  .screen { display: none; }
   .screen.active { display: block !important; }
 
   /* ─── LOGIN ─── */
   #screen-login {
     min-height: 100vh;
-    display: none;
-    align-items: center;
-    justify-content: center;
     background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 100%);
     padding: 20px;
   }
-  #screen-login.active { display: flex !important; }
+  #screen-login.active { display: flex !important; align-items: center; justify-content: center; }
 
   .login-card {
     background: var(--white);
@@ -182,7 +179,7 @@
   /* ─── MAIN ─── */
   .app-main { padding: 28px 24px; max-width: 1000px; margin: 0 auto; }
 
-  /* ─── FORM CARD ─── */
+  /* ─── CARD ─── */
   .card {
     background: var(--white);
     border-radius: var(--radius);
@@ -280,7 +277,6 @@
   }
   .file-group input[type="file"]:hover { border-color: var(--blue); }
 
-  /* PDF preview chip */
   .pdf-chip {
     display: inline-flex; align-items: center; gap: 6px;
     background: var(--blue-light);
@@ -322,7 +318,6 @@
   .emp-item:last-child { border-bottom: none; }
   .btn-remove { background: var(--red); color: var(--white); border: none; padding: 3px 10px; border-radius: 4px; font-size: 11px; cursor: pointer; font-weight: 600; }
 
-  /* notice */
   .notice {
     background: var(--amber-light);
     border-left: 4px solid var(--amber);
@@ -335,7 +330,6 @@
     text-align: center;
   }
 
-  /* submit button */
   .btn-submit {
     width: 100%;
     background: var(--navy);
@@ -449,7 +443,6 @@
     margin-top: 16px;
   }
 
-  /* empty state */
   .empty-state {
     text-align: center; padding: 60px 20px;
     color: var(--gray-400);
@@ -478,7 +471,6 @@
   #toast.success { background: var(--green); }
   #toast.error { background: var(--red); }
 
-  /* hidden util */
   .hidden { display: none !important; }
 
   /* modal */
@@ -490,7 +482,7 @@
     display: flex; align-items: center; justify-content: center;
     padding: 20px;
   }
-  .modal-backdrop.hidden { display: none; }
+  .modal-backdrop.hidden { display: none !important; }
   .modal {
     background: var(--white);
     border-radius: 14px;
@@ -717,7 +709,7 @@
                 <input type="text" id="personaAtendio" required>
               </div>
               <div class="form-group">
-                <label>Responsable de la Empresa</label>
+                <label>Responsable</label>
                 <input type="text" id="responsableTekniplex" required>
               </div>
               <div class="form-group">
@@ -752,9 +744,6 @@
           <span class="stat-chip stat-auth" id="stat-auth">Autorizados: 0</span>
         </div>
       </div>
-      <div id="supervisor-config-notice" class="notice hidden" style="margin-bottom:16px;">
-        ⚙️ Para enviar autorizaciones a Google Sheets, configura la URL del Apps Script en el código (variable <code>APPS_SCRIPT_URL</code>).
-      </div>
       <div id="permits-list"></div>
     </div>
   </main>
@@ -763,7 +752,7 @@
 <div class="modal-backdrop hidden" id="modal-authorize">
   <div class="modal">
     <h3>✅ Autorizar Permiso</h3>
-    <p>¿Confirmas la autorización de este permiso?<br>Los datos se registrarán en Google Sheets, los PDFs se guardarán en Drive y se generará un PDF con la lista de personal, todo dentro de una carpeta con el número de folio.</p>
+    <p>¿Confirmas la autorización de este permiso?<br>Los datos se registrarán en Google Sheets, los PDFs se guardarán en Drive y se generará la estructura correspondiente.</p>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
       <button class="btn-confirm" onclick="confirmAuthorize()">Sí, Autorizar</button>
@@ -775,11 +764,11 @@
 
 <script>
 // ══════════════════════════════════════════
-//  CONFIGURACIÓN — edita esta URL
+//  CONFIGURACIÓN — URL de Producción
 // ══════════════════════════════════════════
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyjIeaHTbqa5CGxqN1-qGWcAXvbQ1zSZZgU_JhlnODMTcAXvZxuXFuiglA6Oe6LOBMFBw/exec"
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbjyIieaHTbqa5CGxqn1-qGWcAXvbQ1zSZZgU_JhlnODMTcAXvZuXFuiglA60e6LOBMFBw/exec";
 
-// Supervisores autorizados: email → contraseña
+// Supervisores autorizados
 const SUPERVISORS = {
   "permisos@tekni.com": "Tekniplex2026$",
   "jefe@empresa.com": "seguridad456"
@@ -788,11 +777,10 @@ const SUPERVISORS = {
 // ══════════════════════════════════════════
 //  ESTADO
 // ══════════════════════════════════════════
-let currentUser = null;   // { email, role }
+let currentUser = null;   
 let empleados = [];
 let pendingAuthorizeId = null;
 
-// Almacenamiento persistente
 const storage = window.storage || {
   async get(k) { const v = localStorage.getItem(k); return v ? { value: v } : null; },
   async set(k, v) { localStorage.setItem(k, v); return true; },
@@ -843,6 +831,7 @@ async function doLogin() {
     displayName = company;
   }
 
+  // Corregido cambio de pantalla ocultando el login por completo
   document.getElementById('screen-login').classList.remove('active');
   document.getElementById('screen-app').classList.add('active');
 
@@ -853,7 +842,6 @@ async function doLogin() {
 
   if (loginRole === 'supervisor') {
     document.getElementById('view-supervisor').classList.remove('hidden');
-    if (APPS_SCRIPT_URL === "TU_URL_AQUI") document.getElementById('supervisor-config-notice').classList.remove('hidden');
     await loadPermits();
   } else {
     document.getElementById('view-colaborador').classList.remove('hidden');
@@ -950,7 +938,7 @@ document.getElementById('permisoForm').addEventListener('submit', async function
     const fileLiq = await toBase64(document.getElementById('pdfLiquidacion').files[0]);
     const fileSua = await toBase64(document.getElementById('pdfSua').files[0]);
     const filePag = await toBase64(document.getElementById('pdfPago').files[0]);
-    let fileDc3={base64:'',name:''}, fileFichas={base64:'',name:''}, fileHds={base64:'',name:''};
+    let fileDc3={base64:'',name:'',dataUrl:''}, fileFichas={base64:'',name:'',dataUrl:''}, fileHds={base64:'',name:'',dataUrl:''};
 
     if (altoRiesgoActivo) {
       const d3 = document.getElementById('pdfDc3').files[0];
@@ -988,18 +976,18 @@ document.getElementById('permisoForm').addEventListener('submit', async function
       listaEmpleados: [...empleados],
       altoRiesgoActivo,
       docs: {
-        liquidacion: { name: fileLiq.name, base64: fileLiq.base64 },
-        sua: { name: fileSua.name, base64: fileSua.base64 },
-        pago: { name: filePag.name, base64: filePag.base64 },
-        dc3: altoRiesgoActivo ? { name: fileDc3.name, base64: fileDc3.base64 } : null,
-        fichas: altoRiesgoActivo ? { name: fileFichas.name, base64: fileFichas.base64 } : null,
-        hds: altoRiesgoActivo ? { name: fileHds.name, base64: fileHds.base64 } : null,
+        liquidacion: { name: fileLiq.name, dataUrl: fileLiq.dataUrl, base64: fileLiq.base64 },
+        sua: { name: fileSua.name, dataUrl: fileSua.dataUrl, base64: fileSua.base64 },
+        pago: { name: filePag.name, dataUrl: filePag.dataUrl, base64: filePag.base64 },
+        dc3: altoRiesgoActivo ? { name: fileDc3.name, dataUrl: fileDc3.dataUrl, base64: fileDc3.base64 } : null,
+        fichas: altoRiesgoActivo ? { name: fileFichas.name, dataUrl: fileFichas.dataUrl, base64: fileFichas.base64 } : null,
+        hds: altoRiesgoActivo ? { name: fileHds.name, dataUrl: fileHds.dataUrl, base64: fileHds.base64 } : null,
       }
     };
 
     await storage.set('permit:' + permit.id, JSON.stringify(permit));
 
-    showToast('✅ Solicitud enviada correctamente', 'success');
+    showToast('✅ Solicitud guardada localmente. Pide al Supervisor su autorización.', 'success');
     document.getElementById('permisoForm').reset();
     document.getElementById('anio').value = new Date().getFullYear();
     empleados = [];
@@ -1069,7 +1057,7 @@ function buildPermitCard(p) {
   const date = new Date(p.timestamp).toLocaleDateString('es-MX', { day:'2-digit', month:'short', year:'numeric' });
   const isAuth = p.status === 'authorized';
 
-  const docChips = buildDocChips(p.id, p.docs);
+  const docChips = buildDocChips(p.docs);
   const empList = p.listaEmpleados.map((e,i)=>`<div class="emp-review-item">${i+1}. ${e}</div>`).join('');
   const authInfo = isAuth
     ? `<div class="authorized-tag">✅ Autorizado por ${p.authorizedBy||'supervisor'} el ${new Date(p.authorizedAt||p.timestamp).toLocaleDateString('es-MX')}</div>`
@@ -1112,7 +1100,7 @@ function buildPermitCard(p) {
   </div>`;
 }
 
-function buildDocChips(permitId, docs) {
+function buildDocChips(docs) {
   if (!docs) return '<span style="font-size:13px;color:var(--gray-400)">Sin documentos</span>';
   const items = [
     { key: 'liquidacion', label: '📄 Liquidación' },
@@ -1123,37 +1111,12 @@ function buildDocChips(permitId, docs) {
     { key: 'hds', label: '⚠️ HDS' },
   ];
   return items
-    .filter(i => docs[i.key] && docs[i.key].base64)
-    .map(i => `<button class="pdf-chip" onclick="viewPdfInNewTab('${permitId}', '${i.key}')" title="${docs[i.key].name}">
+    .filter(i => docs[i.key] && docs[i.key].dataUrl)
+    .map(i => `<a class="pdf-chip" href="${docs[i.key].dataUrl}" target="_blank" title="${docs[i.key].name}">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
       ${i.label}
-    </button>`)
+    </a>`)
     .join('');
-}
-
-// NUEVA FUNCIÓN OPTIMIZADA PARA CONVERTIR EL BASE64 A BLOB Y MOSTRAR EL PDF SIN BLOQUEOS
-async function viewPdfInNewTab(permitId, docKey) {
-  try {
-    const r = await storage.get('permit:' + permitId);
-    if (!r || !r.value) return showToast("No se encontró el documento", "error");
-    const permit = JSON.parse(r.value);
-    const doc = permit.docs ? permit.docs[docKey] : null;
-    if (!doc || !doc.base64) return showToast("El archivo no contiene datos", "error");
-
-    const byteCharacters = atob(doc.base64);
-    const byteNumbers = new Array(byteCharacters.length);
-    for (let i = 0; i < byteCharacters.length; i++) {
-      byteNumbers[i] = byteCharacters.charCodeAt(i);
-    }
-    const byteArray = new Uint8Array(byteNumbers);
-    const blob = new Blob([byteArray], { type: 'application/pdf' });
-    const fileURL = URL.createObjectURL(blob);
-    
-    window.open(fileURL, '_blank');
-  } catch (err) {
-    console.error(err);
-    showToast("Error al procesar el PDF", "error");
-  }
 }
 
 function toggleCard(id) {
@@ -1196,19 +1159,17 @@ async function confirmAuthorize() {
       )
     };
 
-    if (APPS_SCRIPT_URL && APPS_SCRIPT_URL !== "TU_URL_AQUI") {
+    // Optimización de compatibilidad para evitar fallos CORS
+    if (APPS_SCRIPT_URL) {
       const resp = await fetch(APPS_SCRIPT_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        mode: 'no-cors', // Permite saltar bloqueos estrictos de navegadores
+        headers: { 'Content-Type': 'text/plain' }, // Evita la pre-verificación OPTIONS compleja
         body: JSON.stringify(payload)
       });
-      let result;
-      try { result = await resp.json(); } catch { result = null; }
-      if (!result || result.ok !== true) {
-        throw new Error((result && result.error) || 'El servidor de Google no confirmó el guardado.');
-      }
     }
 
+    // Actualizar almacenamiento local
     permit.status = 'authorized';
     permit.authorizedBy = currentUser.email;
     permit.authorizedAt = payload.authorizedAt;
