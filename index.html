@@ -497,6 +497,134 @@
   .btn-cancel { background: var(--gray-100); border: none; padding: 10px 18px; border-radius: var(--radius-sm); font-size: 14px; font-weight: 600; cursor: pointer; }
   .btn-confirm { background: var(--green); color: var(--white); border: none; padding: 10px 20px; border-radius: var(--radius-sm); font-size: 14px; font-weight: 700; cursor: pointer; }
 
+  /* ─── ANIMACIÓN DE AUTORIZACIÓN EXITOSA ─── */
+  .success-overlay {
+    position: fixed; inset: 0;
+    background: rgba(15,32,68,.75);
+    backdrop-filter: blur(6px);
+    z-index: 9999;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0;
+    transition: opacity .4s ease;
+    pointer-events: none;
+  }
+  .success-overlay.visible { opacity: 1; pointer-events: all; }
+
+  .success-box {
+    background: var(--white);
+    border-radius: 20px;
+    padding: 48px 52px;
+    text-align: center;
+    box-shadow: 0 32px 80px rgba(0,0,0,.3);
+    transform: scale(0.7);
+    transition: transform .45s cubic-bezier(.34,1.56,.64,1);
+    max-width: 380px;
+    width: 90%;
+    position: relative;
+    overflow: hidden;
+  }
+  .success-overlay.visible .success-box { transform: scale(1); }
+
+  .success-circle {
+    width: 90px; height: 90px;
+    background: var(--green-light);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 22px;
+    position: relative;
+  }
+  .success-circle::after {
+    content: '';
+    position: absolute;
+    inset: -6px;
+    border-radius: 50%;
+    border: 3px solid var(--green);
+    opacity: 0;
+    animation: ripple-ring 1.5s ease-out infinite;
+  }
+  @keyframes ripple-ring {
+    0%   { transform: scale(0.8); opacity: 0.8; }
+    100% { transform: scale(1.5); opacity: 0; }
+  }
+
+  .success-check {
+    width: 44px; height: 44px;
+    stroke: var(--green);
+    stroke-width: 3;
+    stroke-dasharray: 60;
+    stroke-dashoffset: 60;
+    fill: none;
+    animation: draw-check .6s ease-out .2s forwards;
+  }
+  @keyframes draw-check {
+    to { stroke-dashoffset: 0; }
+  }
+
+  .success-title {
+    font-size: 22px; font-weight: 800;
+    color: var(--navy);
+    margin-bottom: 10px;
+  }
+  .success-sub {
+    font-size: 13px; color: var(--gray-600);
+    line-height: 1.6;
+    margin-bottom: 22px;
+  }
+  .success-steps {
+    display: flex; flex-direction: column; gap: 8px;
+    text-align: left;
+    background: var(--gray-50);
+    border-radius: var(--radius-sm);
+    padding: 14px 18px;
+    margin-bottom: 26px;
+  }
+  .success-step {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 13px; font-weight: 600; color: var(--gray-800);
+    opacity: 0;
+    transform: translateX(-12px);
+    transition: all .4s ease;
+  }
+  .success-step.appear { opacity: 1; transform: translateX(0); }
+  .step-icon { font-size: 16px; }
+  .step-check { margin-left: auto; color: var(--green); font-size: 15px; }
+
+  .success-btn {
+    background: var(--navy);
+    color: var(--white);
+    border: none;
+    padding: 13px 36px;
+    border-radius: var(--radius-sm);
+    font-size: 14px; font-weight: 700;
+    cursor: pointer;
+    transition: background .2s;
+    letter-spacing: .3px;
+  }
+  .success-btn:hover { background: var(--blue); }
+
+  /* confeti */
+  .confetti-piece {
+    position: absolute;
+    width: 8px; height: 8px;
+    border-radius: 2px;
+    opacity: 0;
+    animation: confetti-fall 1.2s ease-out forwards;
+  }
+  @keyframes confetti-fall {
+    0%   { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(200px) rotate(720deg); opacity: 0; }
+  }
+
+  /* card flip a autorizado */
+  .permit-card.just-authorized {
+    animation: card-glow .8s ease;
+  }
+  @keyframes card-glow {
+    0%   { box-shadow: 0 0 0 0 rgba(5,150,105,.6); }
+    50%  { box-shadow: 0 0 0 12px rgba(5,150,105,.2); }
+    100% { box-shadow: var(--shadow-sm); }
+  }
+
   @media (max-width: 640px) {
     .form-grid { grid-template-columns: 1fr; }
     .col-full { grid-column: 1; }
@@ -761,6 +889,25 @@
 </div>
 
 <div id="toast"></div>
+
+<!-- ═══ OVERLAY ÉXITO AUTORIZACIÓN ═══ -->
+<div class="success-overlay" id="success-overlay">
+  <div class="success-box" id="success-box">
+    <div class="success-circle">
+      <svg class="success-check" viewBox="0 0 44 44">
+        <polyline points="6,22 17,33 38,11"/>
+      </svg>
+    </div>
+    <div class="success-title">¡Permiso Autorizado!</div>
+    <div class="success-sub">Los datos han sido registrados y procesados correctamente.</div>
+    <div class="success-steps">
+      <div class="success-step" id="step1"><span class="step-icon">📊</span> Datos guardados en Google Sheets<span class="step-check">✓</span></div>
+      <div class="success-step" id="step2"><span class="step-icon">📁</span> PDFs subidos a Google Drive<span class="step-check">✓</span></div>
+      <div class="success-step" id="step3"><span class="step-icon">✅</span> Permiso movido a Autorizados<span class="step-check">✓</span></div>
+    </div>
+    <button class="success-btn" onclick="closeSuccessOverlay()">Entendido</button>
+  </div>
+</div>
 
 <script>
 // ══════════════════════════════════════════
@@ -1142,7 +1289,10 @@ async function confirmAuthorize() {
   const id = pendingAuthorizeId;
 
   const btn = document.querySelector(`#card-${id} .btn-authorize`);
-  if (btn) { btn.textContent = 'Enviando...'; btn.disabled = true; }
+  if (btn) {
+    btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="animation:spin .8s linear infinite"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4"/></svg> Enviando...';
+    btn.disabled = true;
+  }
 
   try {
     const r = await storage.get('permit:' + id);
@@ -1159,12 +1309,12 @@ async function confirmAuthorize() {
       )
     };
 
-    // Optimización de compatibilidad para evitar fallos CORS
+    // Enviar a Apps Script (no-cors para evitar bloqueos CORS)
     if (APPS_SCRIPT_URL) {
-      const resp = await fetch(APPS_SCRIPT_URL, {
+      await fetch(APPS_SCRIPT_URL, {
         method: 'POST',
-        mode: 'no-cors', // Permite saltar bloqueos estrictos de navegadores
-        headers: { 'Content-Type': 'text/plain' }, // Evita la pre-verificación OPTIONS compleja
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain' },
         body: JSON.stringify(payload)
       });
     }
@@ -1175,8 +1325,8 @@ async function confirmAuthorize() {
     permit.authorizedAt = payload.authorizedAt;
     await storage.set('permit:' + id, JSON.stringify(permit));
 
-    showToast('✅ Permiso autorizado y enviado a Google Sheets', 'success');
-    await loadPermits();
+    // Mostrar animación de éxito
+    showSuccessAnimation(id);
 
   } catch (err) {
     console.error(err);
@@ -1184,6 +1334,71 @@ async function confirmAuthorize() {
     if (btn) { btn.textContent = 'Autorizar y enviar a Google Sheets'; btn.disabled = false; }
   }
 }
+
+// ─── ANIMACIÓN DE ÉXITO ───
+function showSuccessAnimation(authorizedId) {
+  const overlay = document.getElementById('success-overlay');
+  const box = document.getElementById('success-box');
+
+  // Lanzar confeti
+  launchConfetti(box);
+
+  // Mostrar overlay
+  overlay.classList.add('visible');
+
+  // Pasos con delay escalonado
+  ['step1','step2','step3'].forEach((sid, i) => {
+    setTimeout(() => {
+      document.getElementById(sid).classList.add('appear');
+    }, 300 + i * 350);
+  });
+
+  // Recargar lista después de cerrar
+  overlay._authorizedId = authorizedId;
+}
+
+function closeSuccessOverlay() {
+  const overlay = document.getElementById('success-overlay');
+  overlay.classList.remove('visible');
+
+  // Quitar clases appear para resetear
+  ['step1','step2','step3'].forEach(sid => {
+    document.getElementById(sid).classList.remove('appear');
+  });
+
+  // Resaltar la tarjeta que acaba de autorizarse
+  loadPermits().then(() => {
+    const card = document.getElementById('card-' + overlay._authorizedId);
+    if (card) {
+      card.classList.add('just-authorized');
+      setTimeout(() => card.classList.remove('just-authorized'), 1000);
+    }
+  });
+}
+
+function launchConfetti(container) {
+  const colors = ['#059669','#2563eb','#d97706','#7c3aed','#dc2626','#0891b2'];
+  // Limpiar confeti anterior
+  container.querySelectorAll('.confetti-piece').forEach(el => el.remove());
+
+  for (let i = 0; i < 22; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    piece.style.left = Math.random() * 100 + '%';
+    piece.style.top = '10px';
+    piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+    piece.style.animationDelay = (Math.random() * 0.6) + 's';
+    piece.style.animationDuration = (0.9 + Math.random() * 0.6) + 's';
+    piece.style.width = (6 + Math.random() * 6) + 'px';
+    piece.style.height = (6 + Math.random() * 6) + 'px';
+    container.appendChild(piece);
+  }
+}
+
+// CSS para spinner inline
+const styleEl = document.createElement('style');
+styleEl.textContent = '@keyframes spin { to { transform: rotate(360deg); } }';
+document.head.appendChild(styleEl);
 
 // ══════════════════════════════════════════
 //  UTILS
